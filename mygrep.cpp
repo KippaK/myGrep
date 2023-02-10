@@ -2,6 +2,7 @@
 #include <string>
 #include <fstream>
 #include <vector>
+#include <filesystem>
 
 using namespace std;
 
@@ -44,14 +45,22 @@ void noArgs(){
 }
 
 void searchStrFromFile(string options, string search, string fileName){
-    options.erase(0,2);
+    if (!filesystem::exists(fileName)){
+        cout << "File \"" << fileName << "\" doesn't exist in working directory.";
+        return;
+    }
+
     bool printLineNum = false;
     bool printOccurenceCount = false;
-    if (options.find('l') != string::npos){
-        printLineNum = true;
-    }
-    if (options.find('o') != string::npos){
-        printOccurenceCount = true;     
+    
+    if (options.length() > 2){
+        options.erase(0,2);
+        if (options.find('l') != string::npos){
+            printLineNum = true;
+        }
+        if (options.find('o') != string::npos){
+            printOccurenceCount = true;     
+        }
     }
 
     fstream file;
@@ -75,7 +84,7 @@ void searchStrFromFile(string options, string search, string fileName){
 }
 
 int main(int argc, char **argv){
-    if (argc < 2){
+    if (argc == 1){
         noArgs();
         return 0;
     }
