@@ -11,6 +11,10 @@ struct Line {
 };
 
 void printLines(vector<Line> lines, bool printLineNumber, bool printOccurenceCount, string search){
+    if (lines.size() == 0){
+        cout << "No occurences of lines containing \"" << search << "\"";
+        return;
+    }
     for (int i = 0; i < lines.size(); i++){
         if (printLineNumber){
             cout << lines[i].lineNum << ":\t";
@@ -83,5 +87,4 @@ int main(int argc, char **argv){
         searchStrFromFile(argv[1], argv[2], argv[3]);
         return 0;
     }
-
 }
