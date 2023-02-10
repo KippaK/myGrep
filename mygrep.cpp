@@ -39,29 +39,7 @@ void noArgs(){
     return;
 }
 
-void searchStrFromFile(string search, string fileName){
-    fstream file;
-    file.open(fileName, ios::in);
-
-    if (file.is_open()){
-        vector<Line> linesFound;
-        string line;
-        int lineCount = 1;
-        Line lineInfo;
-        while (getline(file, line)){
-            if (line.find(search) != string::npos){
-                lineInfo.line = line;
-                lineInfo.lineNum = lineCount;
-                linesFound.push_back(lineInfo);
-            }
-            lineCount++;
-        }
-        printLines(linesFound, false, false, "");
-    }
-}
-
 void searchStrFromFile(string options, string search, string fileName){
-    int OptCount = options.length() - 2;
     options.erase(0,2);
     bool printLineNum = false;
     bool printOccurenceCount = false;
@@ -98,7 +76,7 @@ int main(int argc, char **argv){
         return 0;
     }
     else if (argc == 3){
-        searchStrFromFile(argv[1], argv[2]);
+        searchStrFromFile("-o", argv[1], argv[2]);
         return 0;
     }
     else if (argc == 4){
