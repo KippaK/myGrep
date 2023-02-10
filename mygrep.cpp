@@ -11,7 +11,7 @@ struct Line {
     int lineNum;
 };
 
-void printLines(vector<Line> lines, bool printLineNumber, bool printOccurenceCount, string search){
+void printLines(vector<Line> lines, bool printLineNumber, bool printOccurenceCount, bool reverseSearch, bool ignoreCase, string search){
     if (lines.size() == 0){
         cout << "No occurences of lines containing \"" << search << "\"";
         return;
@@ -23,7 +23,11 @@ void printLines(vector<Line> lines, bool printLineNumber, bool printOccurenceCou
         cout << lines[i].line << '\n';
     }
     if (printOccurenceCount){
-        cout << "\nOccurences of lines containing \"" << search << "\": " << lines.size();
+        cout << "\nOccurences of lines ";
+        if (reverseSearch){
+            cout << "not ";
+        }
+        cout << "containing \"" << search << "\": " << lines.size();
     }
 }
 
@@ -52,7 +56,9 @@ void searchStrFromFile(string options, string search, string fileName){
 
     bool printLineNum = false;
     bool printOccurenceCount = false;
-    
+    bool reverseSearch = false;
+    bool ignoreCase = false;
+
     if (options.length() > 2){
         options.erase(0,2);
         if (options.find('l') != string::npos){
@@ -60,6 +66,12 @@ void searchStrFromFile(string options, string search, string fileName){
         }
         if (options.find('o') != string::npos){
             printOccurenceCount = true;     
+        }
+        if (options.find('r') != string::npos){
+            reverseSearch = true;
+        }
+        if (options.find('i') != string::npos){
+            ignoreCase = true;
         }
     }
 
@@ -72,14 +84,19 @@ void searchStrFromFile(string options, string search, string fileName){
         int lineCount = 1;
         Line lineInfo;
         while (getline(file, line)){
-            if (line.find(search) != string::npos){
+            if (line.find(search) != string::npos && reverseSearch == false){
+                lineInfo.line = line;
+                lineInfo.lineNum = lineCount;
+                linesFound.push_back(lineInfo);
+            }
+            if (line.find(search) == string::npos && reverseSearch == true){
                 lineInfo.line = line;
                 lineInfo.lineNum = lineCount;
                 linesFound.push_back(lineInfo);
             }
             lineCount++;
         }
-        printLines(linesFound, printLineNum, printOccurenceCount, search);
+        printLines(linesFound, printLineNum, printOccurenceCount, reverseSearch, ignoreCase, search);
     }
 }
 
