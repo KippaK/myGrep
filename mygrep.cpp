@@ -3,6 +3,7 @@
 #include <fstream>
 #include <vector>
 #include <filesystem>
+#include <algorithm>
 
 using namespace std;
 
@@ -27,7 +28,11 @@ void printLines(vector<Line> lines, bool printLineNumber, bool printOccurenceCou
         if (reverseSearch){
             cout << "not ";
         }
-        cout << "containing \"" << search << "\": " << lines.size();
+        cout << "containing \"" << search << "\"";
+        if (ignoreCase){
+            cout << " with case ignored";
+        }
+        cout << ": " << lines.size();
     }
 }
 
@@ -83,19 +88,33 @@ void searchStrFromFile(string options, string search, string fileName){
         string line;
         int lineCount = 1;
         Line lineInfo;
+
+        string searchOriginal = search;
+        string lineOriginal;
         while (getline(file, line)){
+            lineOriginal = line;
+
+            if (ignoreCase){
+                transform(search.begin(), search.end(), search.begin(),
+                    [](unsigned char c){ return std::tolower(c); });
+
+                transform(line.begin(), line.end(), line.begin(),
+                    [](unsigned char c){ return std::tolower(c); });
+            }
+
             if (line.find(search) != string::npos && reverseSearch == false){
-                lineInfo.line = line;
+                lineInfo.line = lineOriginal;
                 lineInfo.lineNum = lineCount;
                 linesFound.push_back(lineInfo);
             }
-            if (line.find(search) == string::npos && reverseSearch == true){
-                lineInfo.line = line;
+            else if (line.find(search) == string::npos && reverseSearch == true){
+                lineInfo.line = lineOriginal;
                 lineInfo.lineNum = lineCount;
                 linesFound.push_back(lineInfo);
             }
             lineCount++;
         }
+
         printLines(linesFound, printLineNum, printOccurenceCount, reverseSearch, ignoreCase, search);
     }
 }
