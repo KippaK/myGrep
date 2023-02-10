@@ -135,16 +135,18 @@ void searchStrFromFile(string options, string search, string fileName){
 
 
 int main(int argc, char **argv){
-    if (argc == 1){
-        noArgs();
-        return 0;
+    switch (argc){
+        case 1:
+            noArgs();
+            break;
+
+        case 3:
+            searchStrFromFile("-o", argv[1], argv[2]);
+            break;
+
+        case 4:
+            searchStrFromFile(argv[1], argv[2], argv[3]);
+            break;
     }
-    else if (argc == 3){
-        searchStrFromFile("-o", argv[1], argv[2]);
-        return 0;
-    }
-    else if (argc == 4){
-        searchStrFromFile(argv[1], argv[2], argv[3]);
-        return 0;
-    }
+    return 0;
 }
