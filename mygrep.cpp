@@ -19,12 +19,12 @@ void stringToLowerCase(string &str){
 
 bool validOptions(string options){
     if (options[0] != '-' || options[1] != 'o'){
-        cerr << "Options not recognized.";
+        cout << "Options not recognized.";
         return false;
     }
     options.erase(0,2);
     if (options.find_first_not_of("ilor") != std::string::npos){
-        cerr << "Options not recognized.";
+        cout << "Options not recognized.";
         return false;
     }
     return true;
@@ -146,15 +146,6 @@ int main(int argc, char **argv){
 
         case 4:
             searchStrFromFile(argv[1], argv[2], argv[3]);
-            break;
-        default:
-            cerr << "Invalid amount of arguments!\n";
-            cout << "Usage: " << filesystem::path(argv[0]).filename() << " [-options] <pattern> <filename>\n"
-                << "Options available:\n"
-                << "\to = Print the number of occurences\n"
-                << "\tl = Print the line numbers where the occurence is found\n"
-                << "\tr = Inverse search\n"
-                << "\ti = Case insensitie search";
             break;
     }
     return 0;
