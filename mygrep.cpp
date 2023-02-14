@@ -12,6 +12,13 @@ struct Line {
     int num;
 };
 
+struct Options {
+    bool lineNumber = false;
+    bool occurenceCount = false;
+    bool reverseSearch = false;
+    bool ignoreCase = false;
+};
+
 void stringToLowerCase(string &str){
     transform(str.begin(), str.end(), str.begin(),
         [](unsigned char c){ return std::tolower(c); });
@@ -30,24 +37,24 @@ bool validOptions(string options){
     return true;
 }
 
-void printLines(vector<Line> lines, bool printLineNumber, bool printOccurenceCount, bool reverseSearch, bool ignoreCase, string search){
+void printLines(vector<Line> lines, Options options, string search){
     if (lines.size() == 0){
         cout << "No occurences of lines containing \"" << search << "\"";
         return;
     }
     for (int i = 0; i < lines.size(); i++){
-        if (printLineNumber){
+        if (options.lineNumber){
             cout << lines[i].num << ":\t";
         }
         cout << lines[i].text << '\n';
     }
-    if (printOccurenceCount){
+    if (options.occurenceCount){
         cout << "Occurences of lines ";
-        if (reverseSearch){
+        if (options.reverseSearch){
             cout << "not ";
         }
         cout << "containing \"" << search << "\"";
-        if (ignoreCase){
+        if (options.ignoreCase){
             cout << " with case ignored";
         }
         cout << ": " << lines.size();
@@ -70,7 +77,7 @@ void noArgs(){
     return;
 }
 
-void searchStrFromFile(string options, string search, string fileName){
+void searchStrFromFile(string optionsStr, string search, string fileName){
     
     fstream file;
     file.open(fileName, ios::in);
@@ -78,51 +85,48 @@ void searchStrFromFile(string options, string search, string fileName){
     string line;
     int lineCount = 1;
     Line currentLine;
+    Options options;
 
     string searchOriginal = search;
     string lineOriginal;
 
-    bool printLineNumber = false;
-    bool printOccurenceCount = false;
-    bool reverseSearch = false;
-    bool ignoreCase = false;
 
     if (!filesystem::exists(fileName)){
         cout << "File \"" << fileName << "\" doesn't exist in working directory.";
         return;
     }
-    if (!validOptions(options)){ return; }
-    options.erase(0, 2);
+    if (!validOptions(optionsStr)){ return; }
+    optionsStr.erase(0, 2);
 
-    if (options.length() > 0){
-        if (options.find('l') != string::npos){
-            printLineNumber = true;
+    if (optionsStr.length() > 0){
+        if (optionsStr.find('l') != string::npos){
+            options.lineNumber = true;
         }
-        if (options.find('o') != string::npos){
-            printOccurenceCount = true;     
+        if (optionsStr.find('o') != string::npos){
+            options.occurenceCount = true;     
         }
-        if (options.find('r') != string::npos){
-            reverseSearch = true;
+        if (optionsStr.find('r') != string::npos){
+            options.reverseSearch = true;
         }
-        if (options.find('i') != string::npos){
-            ignoreCase = true;
+        if (optionsStr.find('i') != string::npos){
+            options.ignoreCase = true;
         }
     }
 
     while (getline(file, line)){
         lineOriginal = line;
 
-        if (ignoreCase){
+        if (options.ignoreCase){
             stringToLowerCase(search);
             stringToLowerCase(line);
         }
 
-        if (line.find(search) != string::npos && reverseSearch == false){
+        if (line.find(search) != string::npos && options.reverseSearch == false){
             currentLine.text = lineOriginal;
             currentLine.num = lineCount;
             linesFound.push_back(currentLine);
         }
-        else if (line.find(search) == string::npos && reverseSearch == true){
+        else if (line.find(search) == string::npos && options.reverseSearch == true){
             currentLine.text = lineOriginal;
             currentLine.num = lineCount;
             linesFound.push_back(currentLine);
@@ -130,7 +134,7 @@ void searchStrFromFile(string options, string search, string fileName){
         lineCount++;
     }
 
-        printLines(linesFound, printLineNumber, printOccurenceCount, reverseSearch, ignoreCase, searchOriginal);
+        printLines(linesFound, options, searchOriginal);
 }
 
 
