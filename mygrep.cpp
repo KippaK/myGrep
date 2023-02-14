@@ -19,21 +19,24 @@ struct Options {
     bool ignoreCase = false;
 };
 
+void printUsage(string fileName){
+    cout << "Usage: " << fileName << " [-options] <pattern> <filename>\n"
+        << "Options available:\n"
+        << "\to = Print the number of occurences\n"
+        << "\tl = Print the line numbers where the occurence is found\n"
+        << "\tr = Inverse search\n"
+        << "\ti = Case insensitie search";
+}
+
 void stringToLowerCase(string &str){
     transform(str.begin(), str.end(), str.begin(),
         [](unsigned char c){ return std::tolower(c); });
 }
 
 bool validOptions(string options){
-    if (options[0] != '-' || options[1] != 'o'){
-        cout << "Options not recognized.";
-        return false;
-    }
+    if (options[0] != '-' || options[1] != 'o'){ return false; }
     options.erase(0,2);
-    if (options.find_first_not_of("ilor") != std::string::npos){
-        cout << "Options not recognized.";
-        return false;
-    }
+    if (options.find_first_not_of("ilor") != std::string::npos){ return false; }
     return true;
 }
 
@@ -77,7 +80,7 @@ void noArgs(){
     return;
 }
 
-void searchStrFromFile(string optionsStr, string search, string fileName){
+void searchStrFromFile(string optionsStr, string search, string fileName, string runningFile){
     
     fstream file;
     file.open(fileName, ios::in);
@@ -90,12 +93,15 @@ void searchStrFromFile(string optionsStr, string search, string fileName){
     string searchOriginal = search;
     string lineOriginal;
 
-
     if (!filesystem::exists(fileName)){
         cout << "File \"" << fileName << "\" doesn't exist in working directory.";
         return;
     }
-    if (!validOptions(optionsStr)){ return; }
+    if (!validOptions(optionsStr)){ 
+        cout << "Options not recognized.\n";
+        printUsage(runningFile);
+        return;
+    }
     optionsStr.erase(0, 2);
 
     if (optionsStr.length() > 0){
@@ -133,23 +139,27 @@ void searchStrFromFile(string optionsStr, string search, string fileName){
         }
         lineCount++;
     }
-
-        printLines(linesFound, options, searchOriginal);
+    printLines(linesFound, options, searchOriginal);
 }
 
 
 int main(int argc, char **argv){
+    string runningFile = (filesystem::path(argv[0]).filename()).generic_string();
     switch (argc){
         case 1:
             noArgs();
             break;
 
         case 3:
-            searchStrFromFile("-o", argv[1], argv[2]);
+            searchStrFromFile("-o", argv[1], argv[2], runningFile);
             break;
 
         case 4:
-            searchStrFromFile(argv[1], argv[2], argv[3]);
+            searchStrFromFile(argv[1], argv[2], argv[3], runningFile);
+            break;
+        default:
+            cerr << "Invalid amount of arguments!\n";
+            printUsage(runningFile);
             break;
     }
     return 0;
