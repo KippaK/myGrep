@@ -29,8 +29,7 @@ void printUsage(string fileName){
 }
 
 void stringToLowerCase(string &str){
-    transform(str.begin(), str.end(), str.begin(),
-        [](unsigned char c){ return std::tolower(c); });
+    transform(str.begin(), str.end(), str.begin(), [](unsigned char c){ return std::tolower(c); });
 }
 
 bool validOptions(string options){
