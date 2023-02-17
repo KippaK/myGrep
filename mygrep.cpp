@@ -41,7 +41,7 @@ void stringToLowerCase(string &str){
 
 Query parseArguments(int argc, char **argv){
     Query query;
-    query.exeName = (filesystem::path(argv[0]).filename()).generic_string();
+    query.exeName = (filesystem::path(argv[0]).stem()).generic_string();
 
     string optionsString = argv[1];
     if (optionsString.length() > 2 && argc == 4){
