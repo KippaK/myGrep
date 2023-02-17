@@ -133,7 +133,7 @@ void searchStrFromFile(Query query){
             stringToLowerCase(searchLowerCase);
             stringToLowerCase(lineLowerCase);
         }
-        if (line.find(query.searchString) != string::npos && query.options.reverseSearch == false){
+        if (line.find(searchLowerCase) != string::npos && query.options.reverseSearch == false){
             currentLine.text = line;
             currentLine.num = lineCount;
             linesFound.push_back(currentLine);
