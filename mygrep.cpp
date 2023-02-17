@@ -27,7 +27,7 @@ struct Query {
 };
 
 void printUsage(string fileName){
-    cout << "Usage: " << fileName << " [-options] <pattern> <filename>\n"
+    cout << "Usage: .\\" << fileName << " [-options] <pattern> <filename>\n"
         << "Options available:\n"
         << "\to = Print the number of occurences\n"
         << "\tl = Print the line numbers where the occurence is found\n"
