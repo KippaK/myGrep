@@ -19,6 +19,13 @@ struct Options {
     bool ignoreCase = false;
 };
 
+struct Query {
+    string exeName;
+    string searchString;
+    string searchFile;
+    Options options;
+};
+
 void printUsage(string fileName){
     cout << "Usage: " << fileName << " [-options] <pattern> <filename>\n"
         << "Options available:\n"
@@ -32,6 +39,37 @@ void stringToLowerCase(string &str){
     transform(str.begin(), str.end(), str.begin(), [](unsigned char c){ return std::tolower(c); });
 }
 
+Query parseArguments(int argc, char **argv){
+    Query query;
+    query.exeName = (filesystem::path(argv[0]).filename()).generic_string();
+
+    string optionsString = argv[1];
+    if (optionsString.length() > 2 && argc == 4){
+        optionsString.erase(0, 2);
+        if (optionsString.find('l') != string::npos){
+            query.options.lineNumber = true;
+        }
+        if (optionsString.find('o') != string::npos){
+            query.options.occurenceCount = true;     
+        }
+        if (optionsString.find('r') != string::npos){
+            query.options.reverseSearch = true;
+        }
+        if (optionsString.find('i') != string::npos){
+            query.options.ignoreCase = true;
+        }
+    }
+    if (argc == 3){
+        query.searchString = argv[1];
+        query.searchFile = argv[2];
+    }
+    else if (argc == 4){
+        query.searchString = argv[2];
+        query.searchFile = argv[3];
+    }
+    return query;
+}
+
 bool validOptions(string options){
     if (options[0] != '-' || options[1] != 'o'){ return false; }
     options.erase(0,2);
@@ -39,26 +77,20 @@ bool validOptions(string options){
     return true;
 }
 
-void printLines(vector<Line> lines, Options options, string search){
+void printLines(vector<Line> lines, Query query){
     if (lines.size() == 0){
-        cout << "No occurences of lines containing \"" << search << "\"";
+        cout << "No occurences of lines containing \"" << query.searchString << "\"";
         return;
     }
     for (int i = 0; i < lines.size(); i++){
-        if (options.lineNumber){
-            cout << lines[i].num << ":\t";
-        }
+        if (query.options.lineNumber){ cout << lines[i].num << ":\t"; }
         cout << lines[i].text << '\n';
     }
-    if (options.occurenceCount){
+    if (query.options.occurenceCount){
         cout << "Occurences of lines ";
-        if (options.reverseSearch){
-            cout << "not ";
-        }
-        cout << "containing \"" << search << "\"";
-        if (options.ignoreCase){
-            cout << " with case ignored";
-        }
+        if (query.options.reverseSearch) { cout << "not "; }
+        cout << "containing \"" << query.searchString << "\"";
+        if (query.options.ignoreCase) { cout << " with case ignored"; }
         cout << ": " << lines.size();
     }
 }
@@ -69,7 +101,6 @@ void noArgs(){
     getline(cin, str);
     cout << "Give search string: ";
     getline(cin, search);
-
     if (str.find(search) != string::npos){
         cout << "\"" << search << "\" found in \"" << str << "\" in postion " << str.find(search);
     }
@@ -79,86 +110,64 @@ void noArgs(){
     return;
 }
 
-void searchStrFromFile(string optionsStr, string search, string fileName, string runningFile){
+void searchStrFromFile(Query query){
     
     fstream file;
-    file.open(fileName, ios::in);
+    file.open(query.searchFile, ios::in);
     vector<Line> linesFound;
     string line;
     int lineCount = 1;
     Line currentLine;
-    Options options;
 
-    string searchOriginal = search;
-    string lineOriginal;
+    string searchLowerCase = query.searchString;
+    string lineLowerCase;
 
-    if (!filesystem::exists(fileName)){
-        cout << "File \"" << fileName << "\" doesn't exist in working directory.";
+    if (!filesystem::exists(query.searchFile)){
+        cout << "File \"" << query.searchFile << "\" doesn't exist in working directory.";
         return;
-    }
-    if (!validOptions(optionsStr)){ 
-        cout << "Options not recognized.\n";
-        printUsage(runningFile);
-        return;
-    }
-    optionsStr.erase(0, 2);
-
-    if (optionsStr.length() > 0){
-        if (optionsStr.find('l') != string::npos){
-            options.lineNumber = true;
-        }
-        if (optionsStr.find('o') != string::npos){
-            options.occurenceCount = true;     
-        }
-        if (optionsStr.find('r') != string::npos){
-            options.reverseSearch = true;
-        }
-        if (optionsStr.find('i') != string::npos){
-            options.ignoreCase = true;
-        }
     }
 
     while (getline(file, line)){
-        lineOriginal = line;
-
-        if (options.ignoreCase){
-            stringToLowerCase(search);
-            stringToLowerCase(line);
+        lineLowerCase = line;
+        if (query.options.ignoreCase){
+            stringToLowerCase(searchLowerCase);
+            stringToLowerCase(lineLowerCase);
         }
-
-        if (line.find(search) != string::npos && options.reverseSearch == false){
-            currentLine.text = lineOriginal;
+        if (line.find(query.searchString) != string::npos && query.options.reverseSearch == false){
+            currentLine.text = line;
             currentLine.num = lineCount;
             linesFound.push_back(currentLine);
         }
-        else if (line.find(search) == string::npos && options.reverseSearch == true){
-            currentLine.text = lineOriginal;
+        else if (line.find(searchLowerCase) == string::npos && query.options.reverseSearch == true){
+            currentLine.text = line;
             currentLine.num = lineCount;
             linesFound.push_back(currentLine);
         }
         lineCount++;
     }
-    printLines(linesFound, options, searchOriginal);
+    printLines(linesFound, query);
 }
 
-
 int main(int argc, char **argv){
-    string runningFile = (filesystem::path(argv[0]).filename()).generic_string();
+    Query query = parseArguments(argc, argv);
+    if (!validOptions(argv[1]) && argc == 4){ 
+        cout << "Options not recognized.\n";
+        printUsage(query.exeName);
+        return 0;
+    }
     switch (argc){
         case 1:
             noArgs();
             break;
-
         case 3:
-            searchStrFromFile("-o", argv[1], argv[2], runningFile);
+            searchStrFromFile(query);
             break;
-
         case 4:
-            searchStrFromFile(argv[1], argv[2], argv[3], runningFile);
+            searchStrFromFile(query);
             break;
         default:
             cerr << "Invalid amount of arguments!\n";
-            printUsage(runningFile);
+            printUsage(query.exeName);
             break;
     }
     return 0;
