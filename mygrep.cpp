@@ -36,7 +36,11 @@ void printUsage(string fileName){
 }
 
 void stringToLowerCase(string &str){
-    transform(str.begin(), str.end(), str.begin(), [](unsigned char c){ return std::tolower(c); });
+    transform(
+        str.begin(), str.end(), str.begin(), [](unsigned char c){
+            return std::tolower(c); 
+        }
+    );
 }
 
 Query parseArguments(int argc, char **argv){
@@ -46,6 +50,7 @@ Query parseArguments(int argc, char **argv){
     string optionsString = argv[1];
     if (optionsString.length() > 2 && argc == 4){
         optionsString.erase(0, 2);
+        
         if (optionsString.find('l') != string::npos){
             query.options.lineNumber = true;
         }
@@ -71,9 +76,16 @@ Query parseArguments(int argc, char **argv){
 }
 
 bool validOptions(string options){
-    if (options[0] != '-' || options[1] != 'o'){ return false; }
+    if (options[0] != '-' || options[1] != 'o'){
+        return false;
+    }
+
     options.erase(0,2);
-    if (options.find_first_not_of("ilor") != std::string::npos){ return false; }
+
+    if (options.find_first_not_of("ilor") != std::string::npos){
+        return false;
+    }
+
     return true;
 }
 
@@ -83,14 +95,25 @@ void printLines(vector<Line> lines, Query query){
         return;
     }
     for (int i = 0; i < lines.size(); i++){
-        if (query.options.lineNumber){ cout << lines[i].num << ":\t"; }
+        if (query.options.lineNumber){
+            cout << lines[i].num << ":\t";
+        }
         cout << lines[i].text << '\n';
     }
+
     if (query.options.occurenceCount){
         cout << "Occurences of lines ";
-        if (query.options.reverseSearch) { cout << "not "; }
+
+        if (query.options.reverseSearch) {
+            cout << "not ";
+        }
+
         cout << "containing \"" << query.searchString << "\"";
-        if (query.options.ignoreCase) { cout << " with case ignored"; }
+
+        if (query.options.ignoreCase) {
+            cout << " with case ignored";
+        }
+
         cout << ": " << lines.size();
     }
 }
@@ -133,12 +156,12 @@ void searchStrFromFile(Query query){
             stringToLowerCase(searchLowerCase);
             stringToLowerCase(lineLowerCase);
         }
-        if (line.find(searchLowerCase) != string::npos && query.options.reverseSearch == false){
+        if (line.find(searchLowerCase) != string::npos && !query.options.reverseSearch){
             currentLine.text = line;
             currentLine.num = lineCount;
             linesFound.push_back(currentLine);
         }
-        else if (line.find(searchLowerCase) == string::npos && query.options.reverseSearch == true){
+        else if (line.find(searchLowerCase) == string::npos && query.options.reverseSearch){
             currentLine.text = line;
             currentLine.num = lineCount;
             linesFound.push_back(currentLine);
