@@ -172,20 +172,23 @@ void searchStrFromFile(Query query){
 }
 
 int main(int argc, char **argv){
-    Query query = parseArguments(argc, argv);
-    if (!validOptions(argv[1]) && argc == 4){ 
-        cout << "Options not recognized.\n";
-        printUsage(query.exeName);
-        return 0;
-    }
+    Query query;
+
     switch (argc){
         case 1:
             noArgs();
             break;
         case 3:
+            query = parseArguments(argc, argv);
             searchStrFromFile(query);
             break;
         case 4:
+            if (!validOptions(argv[1])){ 
+                cout << "Options not recognized.\n";
+                printUsage(query.exeName);
+                return 0;
+            }
+            query = parseArguments(argc, argv);
             searchStrFromFile(query);
             break;
         default:
