@@ -193,7 +193,7 @@ int main(int argc, char **argv){
             break;
         default:
             cerr << "Invalid amount of arguments!\n";
-            printUsage(query.exeName);
+            printUsage((filesystem::path(argv[0]).stem()).generic_string());
             break;
     }
     return 0;
