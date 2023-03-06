@@ -32,7 +32,7 @@ void printUsage(string fileName){
         << "\to = Print the number of occurences\n"
         << "\tl = Print the line numbers where the occurence is found\n"
         << "\tr = Inverse search\n"
-        << "\ti = Case insensitie search";
+        << "\ti = Case insensitive search";
 }
 
 void stringToLowerCase(string &str){
